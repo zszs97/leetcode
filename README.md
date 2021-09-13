@@ -3,74 +3,76 @@
 ## 题目简介
 
  
-- **题目名称** ：
-- **题目链接** ：
-
+【Day 4 】2021-09-13 - (394. 字符串解码)
 -------------------
 
 
 ### 题目思路
 
-可以创建行内公式，例如 $\Gamma(n) = (n-1)!\quad\forall n\in\mathbb N$。或者块级公式：
-
-$$	x = \dfrac{-b \pm \sqrt{b^2 - 4ac}}{2a} $$
-
-### 表格
-| Item      |    Value | Qty  |
-| :-------- | --------:| :--: |
-| Computer  | 1600 USD |  5   |
-| Phone     |   12 USD |  12  |
-| Pipe      |    1 USD | 234  |
-
-### 流程图
-```flow
-st=>start: Start
-e=>end
-op=>operation: My Operation
-cond=>condition: Yes or No?
-
-st->op->cond
-cond(yes)->e
-cond(no)->op
-```
-
-以及时序图:
-
-```sequence
-Alice->Bob: Hello Bob, how are you?
-Note right of Bob: Bob thinks
-Bob-->Alice: I am good thanks!
-```
-
-> **提示：**想了解更多，请查看**流程图**[语法][3]以及**时序图**[语法][4]。
-
-### 复选框
-
-使用 `- [ ]` 和 `- [x]` 语法可以创建复选框，实现 todo-list 等功能。例如：
-
-- [x] 已完成事项
-- [ ] 待办事项1
-- [ ] 待办事项2
-
++ 如果当前的字符为数位，解析出一个数字（连续的多个数位）并进栈
++ 如果当前的字符为字母或者左括号，直接进栈
++ 如果当前的字符为右括号，开始出栈，一直到左括号出栈，出栈序列反转后拼接成一个字符串，此时取出栈顶的数字，就是这个字符串应该出现的次数，我们根据这个次数和字符串构造出新的字符串并进栈
 
 ## 题目代码
 ### 代码块
-``` python
-@requires_authorization
-def somefunc(param1='', param2=0):
-    '''A docstring'''
-    if param1 > param2: # interesting
-        print 'Greater'
-    return (param2 - param1 + 1) or None
-class SomeClass:
-    pass
->>> message = '''interpreter
-... prompt'''
+``` c++
+class Solution {
+public:
+    string getDigits(string &s, size_t &ptr) {
+        string ret = "";
+        while (isdigit(s[ptr])) {
+            ret.push_back(s[ptr++]);
+        }
+        return ret;
+    }
+
+    string getString(vector <string> &v) {
+        string ret;
+        for (const auto &s: v) {
+            ret += s;
+        }
+        return ret;
+    }
+
+    string decodeString(string s) {
+        vector <string> stk;
+        size_t ptr = 0;
+
+        while (ptr < s.size()) {
+            char cur = s[ptr];
+            if (isdigit(cur)) {
+                // 获取一个数字并进栈
+                string digits = getDigits(s, ptr);
+                stk.push_back(digits);
+            } else if (isalpha(cur) || cur == '[') {
+                // 获取一个字母并进栈
+                stk.push_back(string(1, s[ptr++])); 
+            } else {
+                ++ptr;
+                vector <string> sub;
+                while (stk.back() != "[") {
+                    sub.push_back(stk.back());
+                    stk.pop_back();
+                }
+                reverse(sub.begin(), sub.end());
+                // 左括号出栈
+                stk.pop_back();
+                // 此时栈顶为当前 sub 对应的字符串应该出现的次数
+                int repTime = stoi(stk.back()); 
+                stk.pop_back();
+                string t, o = getString(sub);
+                // 构造字符串
+                while (repTime--) t += o; 
+                // 将构造好的字符串入栈
+                stk.push_back(t);
+            }
+        }
+
+        return getString(stk);
+    }
+};
 ```
 
-  [1]: http://maxiang.info/client_zh
-  [2]: https://chrome.google.com/webstore/detail/kidnkfckhbdkfgbicccmdggmpgogehop
-  [3]: http://adrai.github.io/flowchart.js/
-  [4]: http://bramp.github.io/js-sequence-diagrams/
-  [5]: https://dev.yinxiang.com/doc/articles/enml.php
-
+## 复杂度
++ 空间复杂度 O(S) S为字符串长度
++ 时间复杂度 O(S)
